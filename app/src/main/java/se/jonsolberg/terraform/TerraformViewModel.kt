@@ -174,7 +174,7 @@ class TerraformViewModel(app: Application) : AndroidViewModel(app) {
         cc(Cc.RATE, sound.rate)
     }
 
-    fun setExpression(v: Int) {
+    fun sendExpression(v: Int) {
         if (v == expression) return
         expression = v
         cc(Cc.EXPRESSION, v)

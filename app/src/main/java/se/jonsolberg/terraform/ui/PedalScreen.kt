@@ -396,7 +396,7 @@ private fun LiveEditPanel(vm: TerraformViewModel) {
             Text("Expression pedal: ${pct(vm.expression)}%", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Slider(
                 value = vm.expression.toFloat(),
-                onValueChange = { vm.setExpression(it.roundToInt()) },
+                onValueChange = { vm.sendExpression(it.roundToInt()) },
                 valueRange = 0f..127f,
             )
             Text(
