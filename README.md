@@ -13,7 +13,7 @@ Screenshots: [pedal screen](docs/screenshot-pedal.png) · [preset library](docs/
 
 ## Download
 
-Current version: **1.0.0**. Get the APK from the latest run of the **Build APK** workflow under *Actions*
+Current version: **1.0.1**. Get the APK from the latest run of the **Build APK** workflow under *Actions*
 (or from a GitHub release when a `v*` tag is pushed).
 
 ## Requirements
