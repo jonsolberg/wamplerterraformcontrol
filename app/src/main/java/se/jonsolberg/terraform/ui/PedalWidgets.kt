@@ -65,7 +65,7 @@ val LedGreen = Color(0xFF34D058)
 val LedPurple = Color(0xFFB45CFF)
 val LedYellow = Color(0xFFFFD43B)
 
-private val panelLabel = TextStyle(color = PanelText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)
+private val panelLabel = TextStyle(color = PanelText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.6.sp)
 private val bodyLabel = TextStyle(color = BodyText, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
 
 /** Navy top panel with a faint grain. */

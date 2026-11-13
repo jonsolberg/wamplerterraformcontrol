@@ -194,13 +194,14 @@ fun PedalFace(vm: TerraformViewModel, knob: Dp, onStore: () -> Unit) {
                     }
                     // VARIABLE and VOLUME sit between the top knobs, a row lower.
                     Row(Modifier.fillMaxWidth().offset(y = -knob * 0.08f)) {
-                        Spacer(Modifier.weight(0.5f))
+                        Spacer(Modifier.weight(0.25f))
                         PedalKnob("VARIABLE", s.variable, { vm.setValue(Cc.VARIABLE, it) }, Modifier.weight(1f), knob)
+                        Spacer(Modifier.weight(0.5f))
                         PedalKnob(
                             "VOLUME", s.volume, { vm.setValue(Cc.VOLUME, it) }, Modifier.weight(1f), knob,
                             format = ::formatVolume,
                         )
-                        Spacer(Modifier.weight(0.5f))
+                        Spacer(Modifier.weight(0.25f))
                     }
                 }
             }
