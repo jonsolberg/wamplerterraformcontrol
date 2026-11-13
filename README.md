@@ -6,6 +6,11 @@ written in Kotlin with Jetpack Compose. It is a sister app to
 
 > Independent hobby project, not affiliated with Wampler Pedals.
 
+<img src="docs/screenshot-pedal.png" width="320" alt="Pedal screen">
+
+Screenshots: [pedal screen](docs/screenshot-pedal.png) · [preset library](docs/screenshot-presets.png) ·
+[settings](docs/screenshot-settings.png)
+
 ## Download
 
 Current version: **1.0.0**. Get the APK from the latest run of the **Build APK** workflow under *Actions*
