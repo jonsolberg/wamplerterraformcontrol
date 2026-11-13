@@ -174,16 +174,13 @@ fun PedalFace(vm: TerraformViewModel, knob: Dp, onStore: () -> Unit) {
     ) {
         // ---- navy control panel ----
         Column(Modifier.fillMaxWidth().navyPanel().padding(start = 4.dp, end = 8.dp, top = 6.dp, bottom = 10.dp)) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-                Spacer(Modifier.weight(1.45f))
-                RoutingToggle(s.prePost, vm::setPrePost, Modifier.weight(1f))
-                Spacer(Modifier.weight(1f))
-                Spacer(Modifier.weight(1f))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                RoutingToggle(s.prePost, vm::setPrePost)
             }
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
                 EffectSelector(
                     Terraform.EFFECTS.map { it.short }, s.program, vm::setProgram,
-                    Modifier.weight(1.45f).height(knob * 2.35f),
+                    Modifier.weight(1.75f).height(knob * 2.35f),
                 )
                 Column(Modifier.weight(3f)) {
                     Row(Modifier.fillMaxWidth()) {

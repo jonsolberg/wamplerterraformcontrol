@@ -251,8 +251,11 @@ fun EffectSelector(
     ) {
         val h = size.height
         val c = center
-        val ledR = h * 0.36f
-        val textR = h * 0.43f
+        // Shrink the ring when the space is narrow so the side labels never get clipped.
+        val maxLabel = labels.maxOf { measurer.measure(it, style).size.width }
+        val textGap = h * 0.06f
+        val ledR = minOf(h * 0.36f, size.width / 2f - maxLabel - textGap - 4f)
+        val textR = ledR + textGap
         labels.forEachIndexed { i, label ->
             val a = Math.toRadians(angleOf(i).toDouble())
             val ca = cos(a).toFloat()
@@ -271,7 +274,7 @@ fun EffectSelector(
             val y = if (abs(ca) <= 0.25f) anchor.y - th else anchor.y - th / 2f
             drawText(layout, topLeft = Offset(x, y))
         }
-        drawBlackKnob(angleOf(selected), h * 0.26f, c)
+        drawBlackKnob(angleOf(selected), ledR * 0.72f, c)
     }
 }
 
@@ -303,13 +306,12 @@ fun DrawScope.drawSmallLed(c: Offset, r: Float, color: Color, on: Boolean) {
 
 // ------------------------------------------------------------------ PRE/POST mini toggle
 
-/** Two-way mini toggle lying sideways on the top edge: left = PRE/POST, right = NORMAL. */
+/** Two-way mini toggle on the top edge: left = PRE/POST, right = NORMAL. */
 @Composable
 fun RoutingToggle(prePost: Boolean, onChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
     val latest by rememberUpdatedState(onChange)
-    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("~PRE/POST", color = if (prePost) PanelText else PanelText.copy(alpha = 0.45f), fontSize = 8.sp, fontWeight = FontWeight.Bold)
-        Text("NORMAL~", color = if (!prePost) PanelText else PanelText.copy(alpha = 0.45f), fontSize = 8.sp, fontWeight = FontWeight.Bold)
+    androidx.compose.foundation.layout.Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+        Text("PRE/POST", color = if (prePost) PanelText else PanelText.copy(alpha = 0.45f), fontSize = 8.sp, fontWeight = FontWeight.Bold)
         Canvas(
             Modifier
                 .size(width = 44.dp, height = 20.dp)
@@ -326,6 +328,7 @@ fun RoutingToggle(prePost: Boolean, onChange: (Boolean) -> Unit, modifier: Modif
             )
             drawCircle(Brush.radialGradient(listOf(Color.White, Color(0xFF9A9DA2)), center = tip, radius = h * 0.2f), radius = h * 0.18f, center = tip)
         }
+        Text("NORMAL", color = if (!prePost) PanelText else PanelText.copy(alpha = 0.45f), fontSize = 8.sp, fontWeight = FontWeight.Bold)
     }
 }
 
