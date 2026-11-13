@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- ring of effect LEDs -->
+    <path android:fillColor="#FFDADCE0" android:pathData="M37,64a2.4,2.4 0,1 1,0 4.8a2.4,2.4 0,1 1,0 -4.8z" />
+    <path android:fillColor="#FFDADCE0" android:pathData="M32.5,52a2.4,2.4 0,1 1,0 4.8a2.4,2.4 0,1 1,0 -4.8z" />
+    <path android:fillColor="#FFDADCE0" android:pathData="M35,39.5a2.4,2.4 0,1 1,0 4.8a2.4,2.4 0,1 1,0 -4.8z" />
+    <path android:fillColor="#FFDADCE0" android:pathData="M43.5,31a2.4,2.4 0,1 1,0 4.8a2.4,2.4 0,1 1,0 -4.8z" />
+    <path android:fillColor="#FF3D8BFF" android:pathData="M54,27.5a2.8,2.8 0,1 1,0 5.6a2.8,2.8 0,1 1,0 -5.6z" />
+    <path android:fillColor="#FFDADCE0" android:pathData="M64.5,31a2.4,2.4 0,1 1,0 4.8a2.4,2.4 0,1 1,0 -4.8z" />
+    <path android:fillColor="#FFDADCE0" android:pathData="M73,39.5a2.4,2.4 0,1 1,0 4.8a2.4,2.4 0,1 1,0 -4.8z" />
+    <path android:fillColor="#FFDADCE0" android:pathData="M75.5,52a2.4,2.4 0,1 1,0 4.8a2.4,2.4 0,1 1,0 -4.8z" />
+    <path android:fillColor="#FFDADCE0" android:pathData="M71,64a2.4,2.4 0,1 1,0 4.8a2.4,2.4 0,1 1,0 -4.8z" />
+    <!-- knob -->
+    <path android:fillColor="#FF0A0A0C" android:pathData="M54,40a14,14 0,1 1,0 28a14,14 0,1 1,0 -28z" />
+    <path android:fillColor="#FF2A2A2E" android:pathData="M54,43a11,11 0,1 1,0 22a11,11 0,1 1,0 -22z" />
+    <path android:strokeColor="#FFF2EEE4" android:strokeWidth="3"
+        android:strokeLineCap="round" android:pathData="M54,54L54,44.5" />
+</vector>
