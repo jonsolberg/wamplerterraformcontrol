@@ -257,7 +257,7 @@ fun EffectSelector(
         // Shrink the ring when the space is narrow so the side labels never get clipped.
         val maxLabel = labels.maxOf { measurer.measure(it, style).size.width }
         val textGap = h * 0.055f
-        val ledR = minOf(h * 0.36f, size.width / 2f - maxLabel - textGap - 4f)
+        val ledR = minOf(h * 0.40f, size.width / 2f - maxLabel - textGap - 2f)
         val textR = ledR + textGap
         labels.forEachIndexed { i, label ->
             val a = Math.toRadians(angleOf(i).toDouble())
