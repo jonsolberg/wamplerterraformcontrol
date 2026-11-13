@@ -81,8 +81,8 @@ fun PedalScreen(vm: TerraformViewModel, onOpenSettings: () -> Unit) {
         val wide = maxWidth >= 720.dp
         val knob = when {
             wide -> minOf(76.dp, maxHeight / 6.5f)
-            maxWidth < 360.dp -> 40.dp
-            else -> 48.dp
+            maxWidth < 360.dp -> 46.dp
+            else -> 54.dp
         }
         if (wide) {
             Row(Modifier.fillMaxSize().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -181,7 +181,7 @@ fun PedalFace(vm: TerraformViewModel, knob: Dp, onStore: () -> Unit) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 EffectSelector(
                     Terraform.EFFECTS.map { it.short }, s.program, vm::setProgram,
-                    Modifier.weight(1.3f).aspectRatio(1f),
+                    Modifier.weight(1.15f).aspectRatio(1f),
                 )
                 Column(Modifier.weight(1f)) {
                     Row(Modifier.fillMaxWidth()) {

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -174,7 +175,8 @@ fun PedalKnob(
             }
         }
         Spacer(Modifier.height(3.dp))
-        Text(label, style = panelLabel, maxLines = 1)
+        // Long labels (VARIABLE) may spill into the gap beside the knob instead of being cut.
+        Text(label, style = panelLabel, maxLines = 1, softWrap = false, modifier = Modifier.wrapContentWidth(unbounded = true))
     }
 }
 
