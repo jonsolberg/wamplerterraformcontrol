@@ -2,6 +2,9 @@ package se.jonsolberg.terraform.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -224,13 +227,13 @@ fun EffectSelector(
     val measurer = rememberTextMeasurer()
     val latestSelect by rememberUpdatedState(onSelect)
     val latestSelected by rememberUpdatedState(selected)
-    val style = TextStyle(color = PanelText, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+    val style = TextStyle(color = PanelText, fontSize = 11.sp, fontWeight = FontWeight.Bold)
     val selStyle = style.copy(color = Color(0xFF9CC7FF))
 
     fun pick(pos: Offset, w: Float, h: Float) {
         val dx = pos.x - w / 2
         val dy = pos.y - h / 2
-        if (dx * dx + dy * dy < (h * 0.08f) * (h * 0.08f)) return
+        if (dx * dx + dy * dy < (minOf(w, h) * 0.06f).let { it * it }) return
         var deg = Math.toDegrees(atan2(dy, dx).toDouble()).toFloat()
         if (deg < 0) deg += 360f
         val i = nearestIndex(deg, labels.size)
@@ -253,7 +256,7 @@ fun EffectSelector(
         val c = center
         // Shrink the ring when the space is narrow so the side labels never get clipped.
         val maxLabel = labels.maxOf { measurer.measure(it, style).size.width }
-        val textGap = h * 0.06f
+        val textGap = h * 0.055f
         val ledR = minOf(h * 0.36f, size.width / 2f - maxLabel - textGap - 4f)
         val textR = ledR + textGap
         labels.forEachIndexed { i, label ->
@@ -261,7 +264,7 @@ fun EffectSelector(
             val ca = cos(a).toFloat()
             val sa = sin(a).toFloat()
             val led = c + Offset(ca * ledR, sa * ledR)
-            drawSmallLed(led, h * 0.035f, LedBlue, i == selected)
+            drawSmallLed(led, h * 0.03f, LedBlue, i == selected)
             val layout = measurer.measure(label, if (i == selected) selStyle else style)
             val tw = layout.size.width
             val th = layout.size.height
@@ -306,29 +309,60 @@ fun DrawScope.drawSmallLed(c: Offset, r: Float, color: Color, on: Boolean) {
 
 // ------------------------------------------------------------------ PRE/POST mini toggle
 
-/** Two-way mini toggle on the top edge: left = PRE/POST, right = NORMAL. */
+/**
+ * Two-way mini toggle on the top edge: left = PRE/POST, right = NORMAL.
+ * Tapping a label picks that side; tapping the switch flips it.
+ */
 @Composable
 fun RoutingToggle(prePost: Boolean, onChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
     val latest by rememberUpdatedState(onChange)
+    val latestValue by rememberUpdatedState(prePost)
+    val noRipple = remember { MutableInteractionSource() }
+    @Composable
+    fun label(text: String, active: Boolean, value: Boolean) {
+        Box(
+            Modifier
+                .heightIn(min = 44.dp)
+                .clickable(interactionSource = noRipple, indication = null) { latest(value) }
+                .padding(horizontal = 10.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text,
+                color = if (active) PanelText else PanelText.copy(alpha = 0.45f),
+                fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp,
+            )
+        }
+    }
     androidx.compose.foundation.layout.Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-        Text("PRE/POST", color = if (prePost) PanelText else PanelText.copy(alpha = 0.45f), fontSize = 8.sp, fontWeight = FontWeight.Bold)
+        label("PRE/POST", prePost, true)
         Canvas(
             Modifier
-                .size(width = 44.dp, height = 20.dp)
-                .pointerInput(Unit) { detectTapGestures { latest(it.x < size.width / 2) } },
+                .size(width = 64.dp, height = 44.dp)
+                .pointerInput(Unit) {
+                    detectTapGestures { latest(!latestValue) }
+                }
+                .pointerInput(Unit) {
+                    detectDragGestures { change, drag ->
+                        change.consume()
+                        if (drag.x < -2f && !latestValue) latest(true)
+                        if (drag.x > 2f && latestValue) latest(false)
+                    }
+                },
         ) {
             val c = center
-            val h = size.height
+            val h = size.height * 0.62f
+            drawCircle(Color.Black.copy(alpha = 0.4f), radius = h * 0.46f, center = c + Offset(0f, h * 0.06f))
             drawCircle(Brush.sweepGradient(listOf(Color(0xFFF2F2F2), Color(0xFF8C8F94), Color(0xFFE0E0E0), Color(0xFF6B6E73), Color(0xFFF2F2F2)), c), radius = h * 0.42f, center = c)
             drawCircle(Color(0xFF2B2C2F), radius = h * 0.24f, center = c)
-            val tip = Offset(if (prePost) size.width * 0.12f else size.width * 0.88f, c.y)
+            val tip = Offset(if (prePost) size.width * 0.14f else size.width * 0.86f, c.y)
             drawLine(
                 Brush.verticalGradient(listOf(Color(0xFFE0E0E0), Color(0xFF7B7E83))),
                 c, tip, strokeWidth = h * 0.22f, cap = StrokeCap.Round,
             )
-            drawCircle(Brush.radialGradient(listOf(Color.White, Color(0xFF9A9DA2)), center = tip, radius = h * 0.2f), radius = h * 0.18f, center = tip)
+            drawCircle(Brush.radialGradient(listOf(Color.White, Color(0xFF9A9DA2)), center = tip, radius = h * 0.22f), radius = h * 0.2f, center = tip)
         }
-        Text("NORMAL", color = if (!prePost) PanelText else PanelText.copy(alpha = 0.45f), fontSize = 8.sp, fontWeight = FontWeight.Bold)
+        label("NORMAL", !prePost, false)
     }
 }
 

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -80,8 +81,8 @@ fun PedalScreen(vm: TerraformViewModel, onOpenSettings: () -> Unit) {
         val wide = maxWidth >= 720.dp
         val knob = when {
             wide -> minOf(76.dp, maxHeight / 6.5f)
-            maxWidth < 360.dp -> 50.dp
-            else -> 58.dp
+            maxWidth < 360.dp -> 44.dp
+            else -> 52.dp
         }
         if (wide) {
             Row(Modifier.fillMaxSize().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -180,9 +181,9 @@ fun PedalFace(vm: TerraformViewModel, knob: Dp, onStore: () -> Unit) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
                 EffectSelector(
                     Terraform.EFFECTS.map { it.short }, s.program, vm::setProgram,
-                    Modifier.weight(1.75f).height(knob * 2.35f),
+                    Modifier.weight(1f).aspectRatio(1f),
                 )
-                Column(Modifier.weight(3f)) {
+                Column(Modifier.weight(1.25f).padding(top = 6.dp)) {
                     Row(Modifier.fillMaxWidth()) {
                         PedalKnob("RATE", s.rate, { vm.setValue(Cc.RATE, it) }, Modifier.weight(1f), knob)
                         PedalKnob("DEPTH", s.depth, { vm.setValue(Cc.DEPTH, it) }, Modifier.weight(1f), knob)
