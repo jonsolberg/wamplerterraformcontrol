@@ -59,7 +59,7 @@ jobs:
           TAG="v$VERSION"
           # Fixed name, so releases/latest/download/TerraformControl.apk always points at the newest build.
           cp "$APK" TerraformControl.apk
-          cp "$APK" "TerraformControl-$VERSION.apk"
+          [ -e "TerraformControl-$VERSION.apk" ] || cp "$APK" "TerraformControl-$VERSION.apk"
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "TerraformControl-$VERSION.apk" TerraformControl.apk --clobber
           else
