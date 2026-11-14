@@ -13,8 +13,9 @@ Screenshots: [pedal screen](docs/screenshot-pedal.png) · [preset library](docs/
 
 ## Download
 
-Current version: **1.0.1**. Get the APK from the latest run of the **Build APK** workflow under *Actions*
-(or from a GitHub release when a `v*` tag is pushed).
+**[Download the latest APK](https://github.com/jonsolberg/wamplerterraformcontrol/releases/latest/download/TerraformControl.apk)** · [all releases](https://github.com/jonsolberg/wamplerterraformcontrol/releases)
+
+Current version: **1.0.1**. Every push to `main` publishes a new build under Releases.
 
 ## Requirements
 
