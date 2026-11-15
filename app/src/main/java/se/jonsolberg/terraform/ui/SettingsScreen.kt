@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -196,6 +197,14 @@ fun SettingsScreen(vm: TerraformViewModel) {
             if (vm.log.isEmpty()) Hint("Nothing yet. The Terraform sends no MIDI, so turn on “Show outgoing” to see what the app sends.")
             vm.log.take(80).forEach {
                 Text(it, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+            }
+        }
+
+        Section("Support") {
+            Hint("Terraform Control is free, open source and has no ads. If it's useful to you, you can buy me a beer.")
+            val uri = LocalUriHandler.current
+            Button(onClick = { runCatching { uri.openUri("https://ko-fi.com/jonsolberg") } }, modifier = Modifier.fillMaxWidth()) {
+                Text("🍺 Buy me a beer on Ko-fi")
             }
         }
 

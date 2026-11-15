@@ -77,6 +77,13 @@ Without them the APK is debug-signed.
 
 Locally: `./gradlew assembleRelease` (JDK 17, Android SDK 35).
 
+## Support
+
+Terraform Control is free, open source and has no ads. If you find it useful, you can
+[buy me a beer on Ko-fi](https://ko-fi.com/jonsolberg) 🍺
+
+[![Buy me a beer on Ko-fi](https://img.shields.io/badge/Ko--fi-buy%20me%20a%20beer-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/jonsolberg)
+
 ## License
 
 Copyright © 2026 Jon Solberg
