@@ -201,10 +201,10 @@ fun SettingsScreen(vm: TerraformViewModel) {
         }
 
         Section("Support") {
-            Hint("Terraform Control is free, open source and has no ads. If it's useful to you, you can buy me a beer.")
+            Hint("Terraform Control is free, open source and has no ads. If it's useful to you, you can support me.")
             val uri = LocalUriHandler.current
             Button(onClick = { runCatching { uri.openUri("https://ko-fi.com/jonsolberg") } }, modifier = Modifier.fillMaxWidth()) {
-                Text("🍺 Buy me a beer on Ko-fi")
+                Text("❤️ Support me on Ko-fi")
             }
         }
 
