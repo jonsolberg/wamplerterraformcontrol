@@ -15,7 +15,14 @@ Screenshots: [pedal screen](docs/screenshot-pedal.png) · [preset library](docs/
 
 **[Download the latest APK](https://github.com/jonsolberg/wamplerterraformcontrol/releases/latest/download/TerraformControl.apk)** · [all releases](https://github.com/jonsolberg/wamplerterraformcontrol/releases)
 
-Current version: **1.0.1**. Every push to `main` publishes a new build under Releases.
+Every push to `main` publishes a new build under Releases.
+
+The app isn't on Google Play, so Android asks before installing it. When you open the APK, allow your browser or
+file manager to **install unknown apps** (Android shows a switch for it), then tap *Install*.
+
+**[Open the web editor](https://jonsolberg.github.io/wamplerterraformcontrol/)** – the same editor in the browser (Chrome, Edge or
+Opera on a computer, or Chrome on Android) over USB MIDI, with all 11 effects, tempo and a preset library. Its backups are the
+same JSON files as the app's. The source is in `web/`.
 
 ## Requirements
 
@@ -46,6 +53,7 @@ Current version: **1.0.1**. Every push to `main` publishes a new build under Rel
   confirm on the pedal.
 - **Backup** of every preset and the settings in one JSON file. Remembers and auto-connects the last device.
 - MIDI monitor.
+- **About tab** – help, copyright, links and the Ko-fi support link.
 
 ## MIDI used
 

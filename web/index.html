@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<!-- Terraform Control (web) – Copyright (C) 2026 Jon Solberg – GPL v3 or later, see LICENSE. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terraform Control – web editor for the Wampler Terraform</title>
+<meta name="description" content="Edit the Wampler Terraform in the browser over USB MIDI: all 11 effects, knobs, tempo and a 128-slot preset library.">
+<style>
+:root{--bg:#f4f2ee;--card:#fff;--ink:#1f2328;--muted:#6b6f76;--line:#e2ded6;--accent:#d9572b;--good:#2e8b57;--amber:#c8860b;
+  --panel:#1d2026;--panel2:#2a2e36;--knob:#d7d9dd;--led:#ff4b3a}
+@media (prefers-color-scheme:dark){:root{--bg:#121418;--card:#1b1e24;--ink:#e8e9ec;--muted:#9aa0a8;--line:#2c3038}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent)}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:12px}
+header h1{font-size:22px;margin:0}
+header .sub{color:var(--muted);font-size:13px;flex-basis:100%;margin-top:-6px}
+.grow{flex:1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.card h2{font-size:15px;margin:0 0 10px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button,select,input{font:inherit;color:inherit}
+button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button:disabled{opacity:.5;cursor:default}
+select,input[type=text],input[type=number]{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 8px}
+.status{display:inline-flex;align-items:center;gap:6px;font-size:13px;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+.status i{width:9px;height:9px;border-radius:50%;background:#aaa}.status.on i{background:var(--good)}
+.notice{display:none;border-radius:10px;padding:10px 12px;margin-bottom:12px;background:#fff5e0;color:#6b4a0c;border:1px solid #f0d49a}
+.notice.show{display:block}
+@media (prefers-color-scheme:dark){.notice{background:#2c2413;color:#f0d49a;border-color:#5a4718}}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+/* the pedal */
+.pedal{background:linear-gradient(160deg,var(--panel2),var(--panel));border-radius:18px;padding:18px 14px 14px;color:#eee;user-select:none;touch-action:none}
+.knobs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 6px;justify-items:center}
+.knob{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:ns-resize;outline:none}
+.knob svg{width:76px;height:76px}
+.knob b{font-size:12px;letter-spacing:.08em}
+.knob span{font-size:11px;color:#aab}
+.knob:focus-visible svg{filter:drop-shadow(0 0 4px var(--accent))}
+.switches{display:flex;justify-content:center;gap:26px;margin:14px 0 6px}
+.sw3{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px}
+.sw3 .opts{display:flex;gap:4px}
+.sw3 button{background:#3a3f49;border-color:#4a505b;color:#ddd;padding:4px 10px;font-size:12px}
+.sw3 button.on{background:#e8e8ea;color:#111}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding:0 10px}
+.fs{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;letter-spacing:.08em}
+.led{width:12px;height:12px;border-radius:50%;background:#511;box-shadow:inset 0 0 2px #000}
+.led.on{background:var(--led);box-shadow:0 0 10px var(--led)}
+.led.fav.on{background:#9fe;box-shadow:0 0 10px #9fe}
+.fsw{width:58px;height:58px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fafafa,#9a9ea6 60%,#6b6f76);border:3px solid #444;cursor:pointer}
+.fsw:active{transform:scale(.96)}
+.desc{font-size:12.5px;color:var(--muted);margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{padding:4px 12px;font-size:13px}
+.chips button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.lbl{font-size:12px;color:var(--muted);margin:10px 0 4px}
+/* presets */
+.plist{max-height:430px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.pr{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid var(--line);cursor:pointer;font-size:14px}
+.pr:last-child{border-bottom:0}
+.pr.cur{background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.pr .n{width:38px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pr .bar{width:4px;align-self:stretch;border-radius:2px;background:transparent}
+.pr .bar.s{background:var(--good)}.pr .bar.e{background:var(--amber)}
+.pr .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr small{color:var(--muted);font-size:11.5px}
+pre.log{max-height:200px;overflow:auto;font:12px/1.4 ui-monospace,monospace;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;margin:8px 0 0;white-space:pre-wrap}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);max-width:420px}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+footer{color:var(--muted);font-size:13px;text-align:center;margin:20px 0}
+.kofi{background:#ff5e5b;border-color:#ff5e5b;color:#fff}
+</style>
+<style>
+.fx{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px;margin-bottom:14px}
+.fx button{background:#3a3f49;border-color:#4a505b;color:#ddd;padding:6px 6px;font-size:12px;border-radius:8px}
+.fx button.on{background:#7fd3c7;border-color:#7fd3c7;color:#0d1f1c;font-weight:600}
+.fxname{text-align:center;font-size:13px;color:#cfd;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Terraform Control</h1>
+  <span class="status" id="status"><i></i><span id="statusText">Not connected</span></span>
+  <span class="grow"></span>
+  <button class="primary" id="btnConnect">Connect pedal</button>
+  <div class="sub">Edit the Wampler Terraform over USB MIDI – all 11 effects, the knobs, tempo and a 128-slot preset library.
+    Also as an <a href="https://github.com/jonsolberg/wamplerterraformcontrol/releases/latest/download/TerraformControl.apk">Android app</a>.</div>
+</header>
+
+<div class="notice" id="noMidi"><b>This browser can't talk to MIDI devices.</b> Use Chrome, Edge or Opera on a computer,
+  or Chrome on Android with a USB OTG cable. You can still plan presets here and export them to a file.</div>
+
+<div class="card" id="connCard" style="display:none">
+  <div class="row">
+    <label>Output <select id="selOut"></select></label>
+    <label>Input <select id="selIn"></select></label>
+    <label>Channel <select id="selCh"></select></label>
+  </div>
+</div>
+
+<div class="grid">
+<div>
+  <div class="pedal" id="pedal">
+    <div class="fx" id="fx"></div>
+    <div class="fxname" id="fxName"></div>
+    <div class="knobs" id="knobs"></div>
+    <div class="foot">
+      <div class="fs"><div class="led" id="ledOn"></div><button class="fsw" id="fsOn" title="Bypass"></button>ON</div>
+      <div style="text-align:center;font-size:12px;color:#bbb"><div id="tempoTxt"></div></div>
+      <div class="fs"><div class="led fav" id="ledTap"></div><button class="fsw" id="fsTap" title="Tap tempo"></button>TAP</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h2>More settings</h2>
+    <div id="extra"></div>
+    <div class="lbl">Tempo</div>
+    <div class="row"><input type="number" id="bpm" min="30" max="600" value="120" style="width:80px"> BPM
+      <button id="btnBpm">Set</button><button id="btnClearTempo">Use the RATE knob</button></div>
+    <div class="lbl">Subdivision</div><select id="selSub"></select>
+    <div class="lbl">Routing</div><div class="chips" id="chRoute"></div>
+    <div class="desc">Pre/post splits the effects around your amp's drive (mono). Normal is stereo.</div>
+    <div class="lbl">Expression</div><input type="range" id="expr" min="0" max="127" value="0" style="width:100%">
+  </div>
+</div>
+
+<div>
+  <div class="card">
+    <h2>Presets</h2>
+    <div class="row" style="margin-bottom:8px">
+      <button id="btnPrev">‹</button><b id="curName" class="grow">–</b><button id="btnNext">›</button>
+    </div>
+    <div class="row" style="margin-bottom:10px">
+      <button class="primary" id="btnStore">Store</button>
+      <button id="btnSave" title="Write the current slot into the pedal">Save to pedal</button>
+      <button id="btnSend">Send all</button>
+    </div>
+    <div class="plist" id="plist"></div>
+    <div class="desc">Green = stored in the pedal, amber = only here. Click a preset to load it.</div>
+    <div class="row" style="margin-top:10px">
+      <button id="btnExport">Export backup</button>
+      <button id="btnImport">Import</button><input type="file" id="fileImport" accept=".json,application/json" hidden>
+    </div>
+    <div class="desc">Backups are the same JSON files as the Android app's <i>Settings → Backup</i>.</div>
+  </div>
+
+  <div class="card">
+    <h2>About</h2>
+    <div>Terraform Control · © 2026 Jon Solberg · free and open source (GNU GPL v3).</div>
+    <div class="desc">An independent project, not affiliated with Wampler Pedals. Settings and presets are kept in this browser.</div>
+    <div class="row" style="margin-top:10px">
+      <a href="https://jonsolberg.se:8080/">jonsolberg.se – more apps and games</a> ·
+      <a href="https://github.com/jonsolberg/wamplerterraformcontrol">Source and help on GitHub</a>
+    </div>
+    <div class="row" style="margin-top:10px"><a class="kofi" href="https://ko-fi.com/jonsolberg" style="text-decoration:none;border-radius:999px;padding:7px 14px">❤️ Support me on Ko-fi</a></div>
+    <details style="margin-top:10px"><summary>MIDI log</summary><pre class="log" id="log"></pre></details>
+  </div>
+</div>
+</div>
+
+<footer>Works in Chrome, Edge and Opera, and in Chrome on Android. Needs the Terraform firmware with MIDI CC support (October 2023 or newer).</footer>
+</div>
+
+<dialog id="dlg"><form method="dialog">
+  <h3 id="dlgTitle" style="margin-top:0"></h3><div id="dlgBody"></div>
+  <div class="row" style="justify-content:flex-end;margin-top:14px" id="dlgBtns"></div>
+</form></dialog>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+/* ---------------------------------------------------------------- pedal model (as the app) */
+const CC = { BYPASS: 1, PROGRAM: 2, RATE: 3, DEPTH: 4, VARIABLE: 5, BLEND: 6, VOLUME: 7, PHASER_FB: 8, ROTARY: 9, SUB: 11,
+  MS_HIGH: 12, MS_LOW: 13, TAP: 81, ROUTING: 85, EXPRESSION: 100 };
+const FX = [
+  ['Auto Wah', 'A.WAH', 'LFO speed', 'Filter range', 'Q (resonance)', 'Mix', 'mix'],
+  ['Envelope Filter', 'ENVE', 'Attack / release', 'Sensitivity', 'Q (resonance)', 'Mix', 'mix'],
+  ['Flanger', 'FLNG', 'Speed', 'Depth', 'Feedback', 'Mix', 'mix'],
+  ['Phaser', 'PHAS', 'Speed', 'Filter depth', 'Tone', 'Mix', 'mix'],
+  ['Uni-Vibe', 'U.VIB', 'Speed', 'Filter depth', 'Wave shape', 'Mix', 'mix'],
+  ['Rotary', 'RTRY', 'Horn max speed', 'Woofer max speed', 'Ramp speed', 'Woofer ↔ horn', 'rotary'],
+  ['Auto Swell', 'SWEL', 'Attack time', 'Modulation', 'Pick sensitivity', 'Mix', 'mix'],
+  ['Tremolo', 'TREM', 'Speed', 'Depth', 'Wave shape', 'Stereo phase', 'phase'],
+  ['Harmonic Tremolo', 'HARM', 'Speed', 'Depth', 'Width', 'Crossover', 'cross'],
+  ['Chorus', 'CHOR', 'Speed', 'Depth', 'Tone', 'Mix (max = vibrato)', 'mix'],
+  ['Dimension', 'DIME', 'Speed', 'Depth', 'Low end', 'Mix', 'mix'],
+];
+const PHASER = 3, ROTARY = 5, PRESETS = 128;
+const SUBS = ['♩ Quarter', 'Dotted eighth', 'Eighth', 'Sixteenth', 'Half', 'Whole', 'Dotted quarter', 'Quarter triplet',
+  'Dotted sixteenth', 'Dotted half', 'Dotted whole', 'Sixteenth triplet', 'Eighth triplet', 'Half triplet', 'Whole triplet'];
+const pct = v => Math.round(v * 100 / 127);
+const db = v => { const d = v <= 63 ? -6 + 6 * v / 63 : 6 * (v - 63) / 64; return (d > 0 ? '+' : '') + d.toFixed(1) + ' dB'; };
+function blendTxt(kind, v) {
+  if (kind === 'rotary') return pct(v) + '% horn';
+  if (kind === 'phase') return Math.round(v * 180 / 127) + '°';
+  if (kind === 'cross') { const hz = v <= 63 ? 100 * Math.pow(7, v / 63) : 700 * Math.pow(2500 / 700, (v - 63) / 64); return Math.round(hz / 10) * 10 + ' Hz'; }
+  return v === 63 ? '50 / 50' : v < 63 ? (100 - Math.round(v * 50 / 63)) + '% dry' : (50 + Math.round((v - 63) * 50 / 64)) + '% wet';
+}
+const defSound = () => ({ program: 9, rate: 48, depth: 64, variable: 64, blend: 63, volume: 63, phaserFeedback: 63, rotarySlow: true, subdivision: 0, prePost: false, tempoMs: null });
+/** program first: since the 2023 firmware a program change keeps the knob positions */
+function ccList(s) {
+  const l = [[CC.PROGRAM, s.program], [CC.RATE, s.rate], [CC.DEPTH, s.depth], [CC.VARIABLE, s.variable], [CC.BLEND, s.blend], [CC.VOLUME, s.volume]];
+  if (s.program === PHASER) l.push([CC.PHASER_FB, s.phaserFeedback]);
+  if (s.program === ROTARY) l.push([CC.ROTARY, s.rotarySlow ? 127 : 0]);
+  l.push([CC.SUB, s.subdivision], [CC.ROUTING, s.prePost ? 127 : 0]);
+  if (s.tempoMs != null) l.push([CC.MS_HIGH, Math.min(15, (s.tempoMs / 128) | 0)], [CC.MS_LOW, s.tempoMs % 128]);
+  return l;
+}
+function withCc(s, c, v) {
+  s = Object.assign({}, s); v = Math.max(0, Math.min(127, v));
+  switch (c) {
+    case CC.PROGRAM: if (v < FX.length) s.program = v; break;
+    case CC.RATE: s.rate = v; s.tempoMs = null; break;
+    case CC.DEPTH: s.depth = v; break; case CC.VARIABLE: s.variable = v; break;
+    case CC.BLEND: s.blend = v; break; case CC.VOLUME: s.volume = v; break;
+    case CC.PHASER_FB: s.phaserFeedback = v; break; case CC.ROTARY: s.rotarySlow = v > 0; break;
+    case CC.SUB: if (v < SUBS.length) s.subdivision = v; break; case CC.ROUTING: s.prePost = v > 0; break;
+  }
+  return s;
+}
+const summary = s => `${FX[s.program][0]} | Rate ${pct(s.rate)} · Depth ${pct(s.depth)} · ${blendTxt(FX[s.program][6], s.blend)}` + (s.tempoMs ? ` | ${Math.round(60000 / s.tempoMs)} BPM` : '');
+const toJson = s => Object.assign({ effect: FX[s.program][0] }, s);
+function fromJson(o) {
+  const d = defSound(), n = (k, max) => Math.max(0, Math.min(max, Number.isFinite(o[k]) ? o[k] : d[k]));
+  return { program: n('program', FX.length - 1), rate: n('rate', 127), depth: n('depth', 127), variable: n('variable', 127), blend: n('blend', 127),
+    volume: n('volume', 127), phaserFeedback: n('phaserFeedback', 127), rotarySlow: o.rotarySlow !== false, subdivision: n('subdivision', SUBS.length - 1),
+    prePost: !!o.prePost, tempoMs: Number.isFinite(o.tempoMs) && o.tempoMs >= 100 && o.tempoMs <= 2047 ? o.tempoMs : null };
+}
+
+/* ---------------------------------------------------------------- state, kept in the browser */
+const LS = { get(k, d) { try { const v = localStorage.getItem('terra-' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+             set(k, v) { try { localStorage.setItem('terra-' + k, JSON.stringify(v)); } catch (e) { /* private mode */ } } };
+function seeds() {
+  const list = Array.from({ length: PRESETS }, (_, n) => ({ n, name: '', sound: null, sync: 'EMPTY' }));
+  [['Lush Chorus', { program: 9, rate: 40, depth: 70, variable: 60, blend: 63 }], ['Leslie Slow', { program: 5, rate: 70, depth: 60, variable: 64, blend: 80, rotarySlow: true }],
+   ['Surf Trem', { program: 7, rate: 75, depth: 90, variable: 40, blend: 0, volume: 66 }], ['Machine Vibe', { program: 4, rate: 45, depth: 85, variable: 64, blend: 63 }],
+   ['Funk Envelope', { program: 1, rate: 50, depth: 75, variable: 90, blend: 110 }], ['Jet Flange', { program: 2, rate: 20, depth: 110, variable: 85, blend: 50 }]]
+    .forEach(([name, s], i) => { list[i] = { n: i, name, sound: Object.assign(defSound(), s), sync: 'EDITED' }; });
+  return list;
+}
+let presets = LS.get('presets', null) || seeds();
+let cur = LS.get('current', 0), sound = LS.get('sound', defSound()), engaged = true, channel = LS.get('channel', 0);
+const savePresets = () => LS.set('presets', presets);
+const keep = () => { LS.set('sound', sound); LS.set('current', cur); };
+
+/* ---------------------------------------------------------------- MIDI */
+let access = null, out = null, inp = null;
+const logLines = [];
+function log(s) { logLines.unshift(new Date().toTimeString().slice(0, 8) + '  ' + s); if (logLines.length > 200) logLines.pop(); $('log').textContent = logLines.join('\n'); }
+function send(bytes) { if (out) { out.send(bytes); return true; } return false; }
+function cc(n, v) { if (send([0xB0 | channel, n, v])) log(`→ ch${channel + 1} CC ${n} = ${v}`); }
+function program(n) { if (send([0xC0 | channel, n])) log(`→ ch${channel + 1} PC ${n}`); }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function sendAll(s = sound) { for (const [c, v] of ccList(s)) { cc(c, v); await sleep(12); } }
+async function connect() {
+  if (!navigator.requestMIDIAccess) return;
+  try { access = await navigator.requestMIDIAccess({ sysex: false }); } catch (e) { alert('The browser did not allow MIDI access: ' + e.message); return; }
+  access.onstatechange = fillPorts; $('connCard').style.display = ''; fillPorts();
+}
+function fillPorts() {
+  const outs = [...access.outputs.values()], ins = [...access.inputs.values()];
+  const pickName = list => (list.find(p => /terraform|wampler/i.test(p.name)) || list[0] || {}).id;
+  const fill = (sel, list, keepId) => {
+    sel.innerHTML = list.length ? list.map(p => `<option value="${p.id}">${p.name}</option>`).join('') : '<option value="">(none)</option>';
+    sel.value = list.some(p => p.id === keepId) ? keepId : (pickName(list) || '');
+  };
+  fill($('selOut'), outs, out && out.id); fill($('selIn'), ins, inp && inp.id); usePorts();
+}
+function usePorts() {
+  if (inp) inp.onmidimessage = null;
+  out = access.outputs.get($('selOut').value) || null; inp = access.inputs.get($('selIn').value) || null;
+  if (inp) inp.onmidimessage = e => { const [st, a, b] = e.data; if ((st & 0xF0) === 0xB0) log(`← CC ${a} = ${b}`); else if ((st & 0xF0) === 0xC0) log(`← PC ${a}`); };
+  $('status').classList.toggle('on', !!out);
+  $('statusText').textContent = out ? 'Connected: ' + out.name : 'No MIDI output';
+  $('btnConnect').textContent = out ? 'Refresh' : 'Connect pedal';
+}
+
+/* ---------------------------------------------------------------- controls */
+const KNOBS = [[2, 'rate', CC.RATE], [3, 'depth', CC.DEPTH], [4, 'variable', CC.VARIABLE], [5, 'blend', CC.BLEND], [-1, 'volume', CC.VOLUME]];
+function knobSvg(v) {
+  const a = -135 + v / 127 * 270, r = a * Math.PI / 180, x = 38 + 24 * Math.sin(r), y = 38 - 24 * Math.cos(r);
+  return `<svg viewBox="0 0 76 76"><circle cx="38" cy="38" r="31" fill="#111"/><circle cx="38" cy="38" r="27" fill="var(--knob)"/>`
+    + `<circle cx="38" cy="38" r="22" fill="url(#kg)"/><line x1="38" y1="38" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#111" stroke-width="4" stroke-linecap="round"/>`
+    + `<defs><radialGradient id="kg" cx=".35" cy=".3"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#9da1a8"/></radialGradient></defs></svg>`;
+}
+function setVal(c, v) {
+  v = Math.round(v); const next = withCc(sound, c, v);
+  if (JSON.stringify(next) === JSON.stringify(sound)) return;
+  sound = next; cc(c, v); keep(); render();
+}
+function buildKnobs() {
+  $('knobs').innerHTML = KNOBS.map(([, key]) => `<div class="knob" tabindex="0" data-k="${key}"><div class="kv"></div><b>${key.toUpperCase()}</b><span></span></div>`).join('');
+  $('knobs').querySelectorAll('.knob').forEach(el => {
+    const [, key, c] = KNOBS.find(k => k[1] === el.dataset.k);
+    let y0 = 0, x0 = 0, v0 = 0, drag = false;
+    el.addEventListener('pointerdown', e => { drag = true; y0 = e.clientY; x0 = e.clientX; v0 = sound[key]; el.setPointerCapture(e.pointerId); });
+    el.addEventListener('pointermove', e => { if (drag) setVal(c, Math.max(0, Math.min(127, v0 + (y0 - e.clientY + e.clientX - x0) * 0.6))); });
+    el.addEventListener('pointerup', () => { drag = false; });
+    el.addEventListener('dblclick', () => setVal(c, 63));
+    el.addEventListener('wheel', e => { e.preventDefault(); setVal(c, Math.max(0, Math.min(127, sound[key] - Math.sign(e.deltaY) * 3))); }, { passive: false });
+    el.addEventListener('keydown', e => {
+      const d = { ArrowUp: 2, ArrowRight: 2, ArrowDown: -2, ArrowLeft: -2, PageUp: 10, PageDown: -10 }[e.key];
+      if (d) { e.preventDefault(); setVal(c, Math.max(0, Math.min(127, sound[key] + d))); }
+    });
+  });
+}
+function chips(el, labels, on, fn) {
+  el.innerHTML = labels.map((l, i) => `<button class="${i === on ? 'on' : ''}" data-i="${i}">${l}</button>`).join('');
+  el.querySelectorAll('button').forEach(b => b.onclick = () => fn(+b.dataset.i));
+}
+let taps = [], expr = 0;
+function tap() {
+  cc(CC.TAP, 0);
+  if (sound.program === ROTARY) { sound = Object.assign({}, sound, { rotarySlow: !sound.rotarySlow }); keep(); render(); return; }
+  const now = Date.now();
+  if (taps.length && now - taps[taps.length - 1] > 2000) taps = [];
+  taps.push(now); if (taps.length > 4) taps.shift();
+  if (taps.length >= 2) { const bpm = Math.round(60000 / ((taps[taps.length - 1] - taps[0]) / (taps.length - 1))); $('bpm').value = bpm; sound = Object.assign({}, sound, { tempoMs: null }); $('tempoTxt').textContent = 'Tapped ' + bpm + ' BPM'; }
+  $('ledTap').classList.add('on'); setTimeout(() => $('ledTap').classList.remove('on'), 120);
+}
+function setBpm(bpm) {
+  const ms = Math.max(100, Math.min(2047, Math.round(60000 / bpm)));
+  sound = Object.assign({}, sound, { tempoMs: ms }); cc(CC.MS_HIGH, (ms / 128) | 0); cc(CC.MS_LOW, ms % 128); keep(); render();
+}
+
+/* ---------------------------------------------------------------- presets */
+const num = n => String(n + 1).padStart(3, '0');
+function select(n) {
+  if (n < 0 || n >= PRESETS) return;
+  cur = n; const p = presets[n];
+  if (p.sync === 'SYNCED') { sound = p.sound; program(n); }
+  else if (p.sync === 'EDITED') { sound = p.sound; sendAll(); }
+  keep(); render();
+}
+function dialog(title, body, buttons) {
+  $('dlgTitle').textContent = title; $('dlgBody').innerHTML = body;
+  $('dlgBtns').innerHTML = buttons.map(([v, l, p]) => `<button value="${v}" class="${p ? 'primary' : ''}">${l}</button>`).join('');
+  $('dlg').showModal();
+  return new Promise(r => $('dlg').addEventListener('close', () => r($('dlg').returnValue), { once: true }));
+}
+async function store() {
+  const p = presets[cur];
+  const r = await dialog(`Store preset ${num(cur)}`, `<label>Name<br><input type="text" id="nm" value="${(p.name || '').replace(/"/g, '&quot;')}" maxlength="40" style="width:100%"></label>`, [['no', 'Cancel'], ['ok', 'Store', 1]]);
+  if (r !== 'ok') return;
+  presets[cur] = { n: cur, name: $('nm').value.trim(), sound, sync: 'EDITED' }; savePresets(); render();
+}
+/** The Terraform can't enter save mode over MIDI, so saving is guided, as in the app. */
+async function saveToPedal() {
+  const p = presets[cur];
+  if (!out) return alert('Connect the pedal first.');
+  if (!p.sound) return alert('Store a sound in this slot first.');
+  if (!engaged) { engaged = true; cc(CC.BYPASS, 127); }
+  sound = p.sound; await sendAll(p.sound); await sleep(300); render();
+  let r = await dialog(`Save preset ${num(cur)} into the pedal`, '<p>1. On the pedal, hold <b>PRESET / SAVE</b> until the preset LEDs start blinking.</p><p>Then click “LEDs are blinking”.</p>', [['no', 'Cancel'], ['ok', 'LEDs are blinking', 1]]);
+  if (r !== 'ok') return;
+  program(cur);
+  r = await dialog(`Save preset ${num(cur)} into the pedal`, `<p>2. The editor sent Program Change for slot ${num(cur)}.</p><p>Now hold <b>PRESET / SAVE</b> again until the LEDs stop blinking to confirm.</p>`, [['no', 'Cancel'], ['ok', 'Saved', 1]]);
+  if (r !== 'ok') return;
+  presets[cur] = Object.assign({}, p, { sync: 'SYNCED' }); savePresets(); render(); log(`Preset ${num(cur)} saved in the pedal`);
+}
+function exportBackup() {
+  const data = { app: 'Terraform Control', type: 'backup', version: 1, device: 'terraform', settings: { channel },
+    presets: presets.filter(p => p.sound || p.name).map(p => ({ number: p.n, name: p.name, sync: p.sync, sound: p.sound ? toJson(p.sound) : undefined })) };
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+  a.download = 'terraform-backup.json'; a.click();
+}
+async function importFile(f) {
+  try {
+    const root = JSON.parse(await f.text());
+    if (root.device !== 'terraform') throw new Error('not a Terraform Control file');
+    let k = 0, next = cur;
+    (root.presets || []).forEach(o => {
+      if (!o.sound) return;
+      let n = Number.isInteger(o.number) ? o.number : next++;
+      if (n < 0 || n >= PRESETS) return;
+      presets[n] = { n, name: o.name || '', sound: fromJson(o.sound), sync: root.type === 'backup' && o.sync === 'SYNCED' ? 'SYNCED' : 'EDITED' }; k++;
+    });
+    savePresets(); render(); alert(`Imported ${k} preset${k === 1 ? '' : 's'}.`);
+  } catch (e) { alert('Could not read the file: ' + e.message); }
+}
+
+/* ---------------------------------------------------------------- drawing */
+function render() {
+  const fx = FX[sound.program];
+  chips($('fx'), FX.map(f => f[1]), sound.program, i => setVal(CC.PROGRAM, i));
+  $('fxName').textContent = fx[0];
+  $('knobs').querySelectorAll('.knob').forEach(el => {
+    const [li, key] = KNOBS.find(k => k[1] === el.dataset.k), v = sound[key];
+    el.querySelector('.kv').innerHTML = knobSvg(v);
+    el.querySelector('b').textContent = key.toUpperCase();
+    el.querySelector('span').textContent = key === 'volume' ? db(v) : key === 'blend' ? blendTxt(fx[6], v) : `${fx[li]} ${pct(v)}%`;
+  });
+  $('ledOn').classList.toggle('on', engaged);
+  $('tempoTxt').textContent = sound.tempoMs ? Math.round(60000 / sound.tempoMs) + ' BPM · ' + SUBS[sound.subdivision] : SUBS[sound.subdivision];
+  let ex = '';
+  if (sound.program === PHASER) ex = '<div class="lbl">Phaser feedback</div><div class="chips" id="chFb"></div>';
+  if (sound.program === ROTARY) ex = '<div class="lbl">Rotary speed</div><div class="chips" id="chRot"></div>';
+  $('extra').innerHTML = ex;
+  if ($('chFb')) chips($('chFb'), ['Script', 'Block', 'Beyond'], sound.phaserFeedback < 32 ? 0 : sound.phaserFeedback < 96 ? 1 : 2, i => setVal(CC.PHASER_FB, [0, 63, 127][i]));
+  if ($('chRot')) chips($('chRot'), ['Fast', 'Slow'], sound.rotarySlow ? 1 : 0, i => setVal(CC.ROTARY, i ? 127 : 0));
+  $('selSub').value = sound.subdivision;
+  chips($('chRoute'), ['Normal (stereo)', 'Pre / post (mono)'], sound.prePost ? 1 : 0, i => setVal(CC.ROUTING, i ? 127 : 0));
+  const p = presets[cur];
+  $('curName').textContent = `${num(cur)}  ${p.name || (p.sound ? 'Untitled' : '(empty)')}`;
+  $('plist').innerHTML = presets.map(q => `<div class="pr ${q.n === cur ? 'cur' : ''}" data-n="${q.n}"><span class="bar ${q.sync === 'SYNCED' ? 's' : q.sync === 'EDITED' ? 'e' : ''}"></span>
+    <span class="n">${num(q.n)}</span><span class="nm">${q.name || (q.sound ? 'Untitled' : '<small>empty</small>')}${q.sound ? `<br><small>${summary(q.sound)}</small>` : ''}</span></div>`).join('');
+}
+
+/* ---------------------------------------------------------------- start */
+$('selCh').innerHTML = Array.from({ length: 16 }, (_, i) => `<option value="${i}">${i + 1}</option>`).join('');
+$('selCh').value = channel; $('selCh').onchange = e => { channel = +e.target.value; LS.set('channel', channel); };
+$('selSub').innerHTML = SUBS.map((s, i) => `<option value="${i}">${s}</option>`).join('');
+$('selSub').onchange = e => setVal(CC.SUB, +e.target.value);
+$('selOut').onchange = usePorts; $('selIn').onchange = usePorts;
+$('btnConnect').onclick = connect;
+$('fsOn').onclick = () => { engaged = !engaged; cc(CC.BYPASS, engaged ? 127 : 0); render(); };
+$('fsTap').onclick = tap;
+$('btnBpm').onclick = () => setBpm(+$('bpm').value || 120);
+$('btnClearTempo').onclick = () => { sound = Object.assign({}, sound, { tempoMs: null }); cc(CC.RATE, sound.rate); keep(); render(); };
+$('expr').oninput = e => { const v = +e.target.value; if (v !== expr) { expr = v; cc(CC.EXPRESSION, v); } };
+$('btnPrev').onclick = () => select((cur + PRESETS - 1) % PRESETS); $('btnNext').onclick = () => select((cur + 1) % PRESETS);
+$('btnStore').onclick = store; $('btnSave').onclick = saveToPedal; $('btnSend').onclick = () => sendAll();
+$('btnExport').onclick = exportBackup;
+$('btnImport').onclick = () => $('fileImport').click();
+$('fileImport').onchange = e => { if (e.target.files[0]) importFile(e.target.files[0]); e.target.value = ''; };
+$('plist').onclick = e => { const r = e.target.closest('.pr'); if (r) select(+r.dataset.n); };
+if (!navigator.requestMIDIAccess) { $('noMidi').classList.add('show'); $('btnConnect').disabled = true; }
+buildKnobs(); render();
+window.__terra = { get sound() { return sound; }, presets, select, ccList };   // for tests
+</script>
+</body>
+</html>

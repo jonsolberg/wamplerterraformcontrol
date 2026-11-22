@@ -200,15 +200,6 @@ fun SettingsScreen(vm: TerraformViewModel) {
             }
         }
 
-        Section("Support") {
-            Hint("Terraform Control is free, open source and has no ads. If it's useful to you, you can support me.")
-            val uri = LocalUriHandler.current
-            Button(onClick = { runCatching { uri.openUri("https://ko-fi.com/jonsolberg") } }, modifier = Modifier.fillMaxWidth()) {
-                Text("❤️ Support me on Ko-fi")
-            }
-        }
-
-        Hint("Terraform Control is an independent app and is not affiliated with Wampler Pedals.")
     }
 }
 
