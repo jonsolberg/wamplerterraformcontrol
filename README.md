@@ -1,8 +1,9 @@
 # Terraform Control
 
-An Android editor and preset librarian for the Wampler Terraform modulation pedal,
-written in Kotlin with Jetpack Compose. It is a sister app to
-[Iridium Control](https://github.com/jonsolberg/strymoniridiumcontrol) and works on Android 8.0 – 15+.
+An editor and preset librarian for the Wampler Terraform modulation pedal, as an **Android app** and a
+**[web editor](https://jonsolberg.github.io/wamplerterraformcontrol/)** that runs in the browser – no install needed.
+The app is written in Kotlin with Jetpack Compose, works on Android 8.0 – 15+ and is a sister app to
+[Iridium Control](https://github.com/jonsolberg/strymoniridiumcontrol).
 
 > Independent hobby project, not affiliated with Wampler Pedals.
 
