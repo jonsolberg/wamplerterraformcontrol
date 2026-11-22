@@ -7,10 +7,25 @@ The app is written in Kotlin with Jetpack Compose, works on Android 8.0 – 15+ 
 
 > Independent hobby project, not affiliated with Wampler Pedals.
 
-<img src="docs/screenshot-pedal.png" width="320" alt="Pedal screen">
+**[Open the web editor](https://jonsolberg.github.io/wamplerterraformcontrol/)** ·
+**[Download the Android APK](https://github.com/jonsolberg/wamplerterraformcontrol/releases/latest/download/TerraformControl.apk)** ·
+[all releases](https://github.com/jonsolberg/wamplerterraformcontrol/releases)
 
-Screenshots: [pedal screen](docs/screenshot-pedal.png) · [preset library](docs/screenshot-presets.png) ·
-[settings](docs/screenshot-settings.png)
+<p align="center">
+  <img src="docs/web-editor.webp" width="760" alt="The web editor">
+</p>
+<p align="center">
+  <img src="docs/app-pedal.webp" width="190" alt="App: the pedal and the preset bar">
+  <img src="docs/app-pedal-2.webp" width="190" alt="App: live settings under the pedal">
+  <img src="docs/app-presets.webp" width="190" alt="App: the preset library">
+  <img src="docs/app-settings.webp" width="190" alt="App: MIDI connection and pedal settings">
+</p>
+<p align="center">
+  <img src="docs/app-about.webp" width="190" alt="App: help and About">
+  <img src="docs/web-phone.webp" width="190" alt="The web editor on a phone">
+  <img src="docs/app-landscape.webp" width="390" alt="App: landscape">
+</p>
+
 
 ## Download
 
