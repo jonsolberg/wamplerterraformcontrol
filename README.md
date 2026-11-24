@@ -1,4 +1,4 @@
-# Terraform Control
+# Terraform Control (web+Android)
 
 An editor and preset librarian for the Wampler Terraform modulation pedal, as an **Android app** and a
 **[web editor](https://jonsolberg.github.io/wamplerterraformcontrol/)** that runs in the browser – no install needed.
